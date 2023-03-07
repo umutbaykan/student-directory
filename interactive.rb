@@ -1,9 +1,11 @@
+require "csv"
 @students = []
 
+
 def input_students
+  ### Add students until user stops
   puts "Please enter the names of the students"
   puts "To finish, just hit return twice"
-  # create an empty array
   # get the first name
   name = STDIN.gets.chomp
   while name != ""
@@ -19,35 +21,39 @@ def input_students
 end
 
 def add_into_students(name, cohort=:november)
+  ### Reformats student info to add into global @student variable
   @students << {name: name, cohort: cohort.to_sym}
 end
 
 def save_students(filename="students.csv")
+  ### Saves the students info into specified csv file
+  # check if path is valid, terminate if not
   return if is_filename_invalid?(filename)
-  open(filename, mode="w") {|file|
-  @students.each do |student|
-    csv_line = "#{student[:name]}, #{student[:cohort]}"
-    file.puts csv_line
+  # write each student as a separate row to csv
+  CSV.open(filename, "w") do |file|
+    @students.each do |student|
+      file << [student[:name], student[:cohort]]
+    end
   end
-  }
   puts "Students successfully saved in #{filename} file\n\n"
 end
 
 def load_students(filename="students.csv")
+  ### Loads student info from specified csv file
+  # check if path is valid, terminate if not
   return if is_filename_invalid?(filename)
-  ### resets the array so we dont duplicate student data if we load more than once
+  # resets the array so we dont duplicate student data if we load more than once
   @students = []
-  # file = File.open(filename, "r")
-  open(filename, mode="r") {|file|
-  file.readlines.each do |student|
-    name, cohort = student.chomp.split(", ")
+  # extract student information from csv and push into global array
+  CSV.foreach(filename) do |student|
+    name, cohort = student[0], student[1]
     add_into_students(name, cohort)
   end
-  }
   puts "Loaded #{@students.count} from #{filename}\n\n"
 end
 
 def is_filename_invalid?(filename)
+  ### checks if such filename exists, terminates parent sequence if not
   if filename == nil
     puts "No filename specified. Terminating process"
     return true
@@ -56,6 +62,8 @@ def is_filename_invalid?(filename)
 end
 
 def ask_next_move
+  ### asks whether the user would like to terminate or continue 
+  ### used if the command line argument does not point at valid file name
   puts "Would you like to continue with an empty database anyway? Y/N"
   input = STDIN.gets.chomp.upcase
   while input != "Y" || input != "N"
@@ -72,6 +80,7 @@ end
 
 
 def ask_file_choice
+  ### asks the user which file to operate on
   puts "Which file would you like to use? Please enter with .csv ending"
   filename = STDIN.gets.chomp
   if File.exist?(filename)  
@@ -83,33 +92,22 @@ end
 
 
 def try_load_students
+  ### loads the specified command line data file by default into program.
   filename = ARGV.first
   filename = 'students.csv' if filename.nil?
+  # checks if such filename exists
   if File.exist?(filename)
     load_students(filename)
   else
+    # asks user whether to continue with an empty database or quit program
     puts "Filename #{filename} does not exist."
     choice = ask_next_move
     choice == "Y" ? return : exit
   end
 end
 
-def print_header
-  puts "The students of my cohort at Makers Academy"
-  puts "-------------"
-end
-
-def print_students
-  @students.each do |student|
-    puts "#{student[:name]} (#{student[:cohort]} cohort)"
-  end
-end
-
-def print_footer
-  puts "Overall, we have #{@students.count} great students\n\n"
-end
-
 def print_menu
+  ### menu to display at terminal
   puts "1. Input the students"
   puts "2. Show the students"
   puts "3. Save students into a CSV file"
@@ -118,12 +116,19 @@ def print_menu
 end
 
 def show_students
-  print_header
-  print_students
-  print_footer
+  ### displays the list of students
+  ### refactored header, print_students and footer to avoid
+  ### too many methods for simple tasks
+  puts "The students of my cohort at Makers Academy"
+  puts "-------------"
+  @students.each do |student|
+    puts "#{student[:name]} (#{student[:cohort]} cohort)"
+  end
+  puts "Overall, we have #{@students.count} great students\n\n"
 end
 
 def process(selection)
+  ### executes the relevant function based on user input
   case selection
    when "1"
       input_students
@@ -142,6 +147,7 @@ def process(selection)
 end
 
 def interactive_menu
+  ### runs the program unless terminated
   loop do
     print_menu
     process(STDIN.gets.chomp)
