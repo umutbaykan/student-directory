@@ -20,13 +20,20 @@ def print(names)
   #   i += 1
   # end
   
+  ### This section prints students grouped by cohort
+  hash = names.group_by{|student| student[:cohort]}
+  hash.each do |cohort, value| 
+    name = value.map {|student| student[:name]}.join(", ")
+    puts "#{cohort}: #{name}"
+  end
+  
   ## This section prints them based on the sequence they were input 
   ## as well as requires the student name to be >12 to print
-  names.each.with_index(1) do |student, index| 
-    if student[:name].length < 12
-      puts "#{index} #{student[:name]} (#{student[:cohort]} cohort)"
-    end
-  end
+  # names.each.with_index(1) do |student, index| 
+  #   if student[:name].length < 12
+  #     puts "#{index} #{student[:name]} (#{student[:cohort]} cohort)"
+  #   end
+  # end
 end
 
 def print_footer(names)
