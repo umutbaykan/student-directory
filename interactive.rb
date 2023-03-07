@@ -6,14 +6,14 @@ def input_students
   # create an empty array
   # students = []
   # get the first name
-  name = gets.chomp
+  name = STDIN.gets.chomp
   while name != ""
     if name != ""
       # add the student hash to the array
       @students << {name: name, cohort: :november}
       puts "Now we have #{@students.count} students"
       # get another name from the user
-      name = gets.chomp
+      name = STDIN.gets.chomp
     end
   end
 end
@@ -27,13 +27,38 @@ def save_students
   file.close
 end
 
-def load_students
-  file = File.open("students.csv", "r")
+def load_students(filename="students.csv")
+  file = File.open(filename, "r")
+  ### resets the array so we dont duplicate student data if we load more than once
+  @students = []
   file.readlines.each do |student|
     name, cohort = student.chomp.split(", ")
     @students << {name: name, cohort: cohort.to_sym}
   end
   file.close
+end
+
+
+def try_load_students
+  filename = ARGV.first
+  filename = 'students.csv' if filename.nil?
+  if File.exist?(filename)
+    load_students(filename)
+    puts "Loaded #{@students.count} from #{filename}"
+  else
+    puts "Filename #{filename} does not exist."
+    puts "Would you like to continue anyway? Y/N"
+    input = STDIN.gets.chomp
+    while input != "Y" || input != "N"
+      if input == "Y"
+        return
+      elsif input == "N"
+        exit
+      else
+        input = STDIN.gets.chomp
+      end
+    end  
+  end
 end
 
 def print_header
@@ -82,13 +107,12 @@ def process(selection)
   end
 end
 
-
 def interactive_menu
   loop do
     print_menu
-    process(gets.chomp)
+    process(STDIN.gets.chomp)
   end
 end
 
-
+try_load_students
 interactive_menu
