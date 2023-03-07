@@ -24,26 +24,27 @@ end
 
 def save_students(filename="students.csv")
   return if is_filename_invalid?(filename)
-  file = File.open(filename, "w")
+  open(filename, mode="w") {|file|
   @students.each do |student|
     csv_line = "#{student[:name]}, #{student[:cohort]}"
     file.puts csv_line
   end
-  file.close
+  }
   puts "Students successfully saved in #{filename} file\n\n"
 end
 
 def load_students(filename="students.csv")
   return if is_filename_invalid?(filename)
-  file = File.open(filename, "r")
   ### resets the array so we dont duplicate student data if we load more than once
   @students = []
+  # file = File.open(filename, "r")
+  open(filename, mode="r") {|file|
   file.readlines.each do |student|
     name, cohort = student.chomp.split(", ")
     add_into_students(name, cohort)
   end
+  }
   puts "Loaded #{@students.count} from #{filename}\n\n"
-  file.close
 end
 
 def is_filename_invalid?(filename)
