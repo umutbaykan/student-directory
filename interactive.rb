@@ -90,6 +90,9 @@ def ask_file_choice
   end
 end
 
+def print_source_code
+  File.open(__FILE__,"r"){|file| file.readlines.each{|line| puts line}}
+end
 
 def try_load_students
   ### loads the specified command line data file by default into program.
@@ -112,6 +115,7 @@ def print_menu
   puts "2. Show the students"
   puts "3. Save students into a CSV file"
   puts "4. Load the list of students from different CSV file"
+  puts "8. Print source code of program"
   puts "9. Exit\n\n"
 end
 
@@ -138,6 +142,8 @@ def process(selection)
       save_students(ask_file_choice)
     when "4"
       load_students(ask_file_choice)
+    when "8"
+      print_source_code
     when "9"
       puts "Exiting, goodbye!"
       exit
